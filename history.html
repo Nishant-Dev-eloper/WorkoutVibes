@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase History - Workout Vibes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto&display=swap" rel="stylesheet">
+    <script>
+      if (!localStorage.getItem('userEmail')) {
+        window.location.href = 'login.html';
+      }
+    </script>
+</head>
+<body>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="history.html" class="active">History</a></li>
+        </ul>
+    </nav>
+    <header class="hero-section">
+        <div class="hero-content">
+            <h1>Purchase History</h1>
+            <p>See all your past orders and purchases</p>
+        </div>
+    </header>
+    <section class="history-section">
+        <div class="history-table-container">
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Image</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Orders will be loaded here by JS -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <footer>
+        <p>&copy; 2024 Workout Vibes. All rights reserved.</p>
+    </footer>
+    <script>
+    const userEmail = localStorage.getItem('userEmail') || '';
+    async function loadHistory() {
+        const res = await fetch(`/api/history?user_email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        const tbody = document.querySelector('#historyTable tbody');
+        tbody.innerHTML = '';
+        if (data.success && data.history.length) {
+            data.history.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(row.order_time).toLocaleString()}</td>
+                    <td>${row.name}</td>
+                    <td>${row.image ? `<img src="${row.image}" alt="${row.name}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">` : ''}</td>
+                    <td>${row.quantity}</td>
+                    <td>₹${row.price}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5">No purchase history found.</td></tr>';
+        }
+    }
+    loadHistory();
+    </script>
+</body>
+</html> 

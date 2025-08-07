@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership History - Workout Vibes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto&display=swap" rel="stylesheet">
+    <script>
+      if (!localStorage.getItem('userEmail')) {
+        window.location.href = 'login.html';
+      }
+    </script>
+</head>
+<body>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About</a></li>
+            <li><a href="index.html#reviews">Reviews</a></li>
+            <li><a href="index.html#memberships">Memberships</a></li>
+            <!-- <li><a href="shop.html">Shop</a></li> -->
+            <li><a href="diet-chart.html">Diet Chart</a></li>
+            <li><a href="membership-history.html" class="active">Membership History</a></li>
+        </ul>
+    </nav>
+    <header class="hero-section">
+        <div class="hero-content">
+            <h1>Membership History</h1>
+            <p>See all your past and current memberships</p>
+        </div>
+    </header>
+    <section class="history-section">
+        <div class="history-table-container">
+            <table class="history-table" id="membershipHistoryTable">
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Time Left</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Memberships will be loaded here by JS -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <footer>
+        <p>&copy; 2024 Workout Vibes. All rights reserved.</p>
+    </footer>
+    <script>
+    const userEmail = localStorage.getItem('userEmail') || '';
+    if (!userEmail) {
+        alert('Please log in to view your membership history.');
+        window.location.href = 'login.html';
+    }
+    let timers = [];
+    function msToTime(duration) {
+        if (duration <= 0) return 'Expired';
+        let seconds = Math.floor((duration / 1000) % 60),
+            minutes = Math.floor((duration / (1000 * 60)) % 60),
+            hours = Math.floor((duration / (1000 * 60 * 60)) % 24),
+            days = Math.floor(duration / (1000 * 60 * 60 * 24));
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+    async function loadMembershipHistory() {
+        const res = await fetch(`/api/membership/history?user_email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        const tbody = document.querySelector('#membershipHistoryTable tbody');
+        tbody.innerHTML = '';
+        timers = [];
+        if (data.success && data.history.length) {
+            data.history.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.plan}</td>
+                    <td>${new Date(row.start_date).toLocaleString()}</td>
+                    <td>${new Date(row.end_date).toLocaleString()}</td>
+                    <td class="status">${row.status}</td>
+                    <td class="timer" id="timer${idx}">${row.status === 'Not Expired' ? msToTime(row.timeLeft) : 'Expired'}</td>
+                `;
+                tbody.appendChild(tr);
+                if (row.status === 'Not Expired') {
+                    timers.push({ idx, end: new Date(row.end_date).getTime() });
+                }
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5">No membership history found.</td></tr>';
+        }
+    }
+    function updateTimers() {
+        const now = Date.now();
+        timers.forEach(t => {
+            const left = t.end - now;
+            const el = document.getElementById('timer' + t.idx);
+            if (el) {
+                if (left > 0) {
+                    el.textContent = msToTime(left);
+                } else {
+                    el.textContent = 'Expired';
+                    el.parentElement.querySelector('.status').textContent = 'Expired';
+                }
+            }
+        });
+    }
+    loadMembershipHistory().then(() => {
+        setInterval(updateTimers, 1000);
+    });
+    </script>
+</body>
+</html> 

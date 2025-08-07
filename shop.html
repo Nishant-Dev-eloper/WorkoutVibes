@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - Workout Vibes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About</a></li>
+            <li><a href="index.html#supplements">Supplements</a></li>
+            <li><a href="index.html#memberships">Memberships</a></li>
+            <!-- <li><a href="workout.html">Workout</a></li> -->
+            <!-- <li><a href="shop.html" class="active">Shop</a></li> -->
+            <li class="auth-buttons" id="authButtons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="signup.html" class="signup-btn">Sign Up</a>
+            </li>
+            <li class="user-info" id="userInfo" style="display: none;">
+                <span class="user-name" id="userName">User</span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </li>
+            <li class="darkmode-toggle-li">
+                <button id="darkModeToggle" class="darkmode-toggle" title="Toggle dark mode">🌙</button>
+            </li>
+        </ul>
+    </nav>
+    <header class="hero-section">
+        <div class="hero-content">
+            <h1>Shop</h1>
+            <p>Find the best gym gear, supplements, and more!</p>
+        </div>
+    </header>
+    <section class="shop-section">
+        <div class="shop-grid" id="shopGrid">
+            <!-- Products will be loaded here by JS -->
+        </div>
+        <button id="cartBtn" class="cart-btn">🛒 Cart (<span id="cartCount">0</span>)</button>
+        <div id="cartSidebar" class="cart-sidebar">
+            <h2>Your Cart</h2>
+            <div id="cartItems"></div>
+            <div class="cart-total">Total: ₹<span id="cartTotal">0</span></div>
+            <button id="buyAllBtn" class="buy-all-btn">Buy All</button>
+            <button id="closeCartBtn" class="close-cart-btn">Close</button>
+        </div>
+        <a href="history.html" class="history-link">View Purchase History</a>
+    </section>
+    <footer>
+        <p>&copy; 2024 Workout Vibes. All rights reserved.</p>
+    </footer>
+    <!-- <script src="main.js"></script> -->
+    <script>
+    // --- SHOP PAGE JS ---
+    function showLoginRequiredShop() {
+      // Create overlay if it doesn't exist
+      let overlay = document.querySelector('.disabled-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'disabled-overlay';
+        overlay.innerHTML = `
+          <div class="disabled-message">
+            <h2>🔒 Login Required</h2>
+            <p>You need to be logged in to add products to cart or buy from the shop.</p>
+            <a href="login.html" class="login-now-btn">Login Now</a>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+      }
+      overlay.style.display = 'flex';
+      // Close overlay when clicking outside
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.style.display = 'none';
+        }
+      });
+      // Close overlay when clicking login button
+      const loginBtn = overlay.querySelector('.login-now-btn');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+          overlay.style.display = 'none';
+        });
+      }
+    }
+    const userEmail = localStorage.getItem('userEmail') || '';
+    // Fetch products
+    async function loadProducts() {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success) {
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+            data.products.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <div class="shop-img-placeholder">${prod.image ? `<img src="${prod.image}" alt="${prod.name}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : 'Image'}</div>
+                    <div class="shop-info">
+                        <h3>${prod.name}</h3>
+                        <p class="shop-desc">${prod.description || ''}</p>
+                        <div class="shop-price">₹${prod.price}</div>
+                        <div class="shop-actions">
+                            <button class="add-cart-btn" data-id="${prod.id}">Add to Cart</button>
+                            <button class="buy-now-btn" data-id="${prod.id}">Buy Now</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+    }
+    // Cart logic
+    async function updateCartCount() {
+        if (!userEmail) return;
+        const res = await fetch(`/api/cart?user_email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        document.getElementById('cartCount').textContent = data.cart ? data.cart.length : 0;
+    }
+    async function showCartSidebar() {
+        if (!userEmail) { showLoginRequiredShop(); return; }
+        const sidebar = document.getElementById('cartSidebar');
+        sidebar.style.display = 'block';
+        const res = await fetch(`/api/cart?user_email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        const itemsDiv = document.getElementById('cartItems');
+        let total = 0;
+        itemsDiv.innerHTML = '';
+        if (data.cart && data.cart.length) {
+            data.cart.forEach(item => {
+                total += item.price * item.quantity;
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div class="cart-item-img">${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">` : ''}</div>
+                    <div class="cart-item-info">
+                        <div>${item.name}</div>
+                        <div>₹${item.price} x ${item.quantity}</div>
+                    </div>
+                    <button class="remove-cart-btn" data-id="${item.product_id}">Remove</button>
+                `;
+                itemsDiv.appendChild(div);
+            });
+        } else {
+            itemsDiv.innerHTML = '<div>Your cart is empty.</div>';
+        }
+        document.getElementById('cartTotal').textContent = total;
+    }
+    async function addToCart(productId) {
+        if (!userEmail) { showLoginRequiredShop(); return; }
+        await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_email: userEmail, product_id: productId, quantity: 1 })
+        });
+        updateCartCount();
+    }
+    async function removeFromCart(productId) {
+        if (!userEmail) { showLoginRequiredShop(); return; }
+        await fetch('/api/cart', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_email: userEmail, product_id: productId })
+        });
+        showCartSidebar();
+        updateCartCount();
+    }
+    async function buyAll() {
+        if (!userEmail) { showLoginRequiredShop(); return; }
+        const res = await fetch('/api/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_email: userEmail })
+        });
+        if ((await res.json()).success) {
+            alert('Order placed successfully!');
+            showCartSidebar();
+            updateCartCount();
+        }
+    }
+    // Event listeners
+    document.addEventListener('click', e => {
+        if (e.target.classList.contains('add-cart-btn')) {
+            if (!userEmail) { showLoginRequiredShop(); return; }
+            addToCart(e.target.dataset.id);
+        }
+        if (e.target.classList.contains('buy-now-btn')) {
+            if (!userEmail) { showLoginRequiredShop(); return; }
+            addToCart(e.target.dataset.id).then(buyAll);
+        }
+        if (e.target.id === 'cartBtn') {
+            showCartSidebar();
+        }
+        if (e.target.classList.contains('remove-cart-btn')) {
+            removeFromCart(e.target.dataset.id);
+        }
+        if (e.target.id === 'closeCartBtn') {
+            document.getElementById('cartSidebar').style.display = 'none';
+        }
+        if (e.target.id === 'buyAllBtn') {
+            buyAll();
+        }
+    });
+    // Initial load
+    loadProducts();
+    updateCartCount();
+    </script>
+</body>
+</html> 

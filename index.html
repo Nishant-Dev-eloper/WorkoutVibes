@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Vibes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#reviews">Reviews</a></li>
+            <li><a href="#memberships">Memberships</a></li>
+            <!-- <li><a href="shop.html">Shop</a></li> -->
+            <li><a href="diet-chart.html">Diet Chart</a></li>
+            <li class="auth-buttons" id="authButtons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="signup.html" class="signup-btn">Sign Up</a>
+            </li>
+            <li class="user-info" id="userInfo" style="display: none;">
+                <span class="user-name" id="userName">User</span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </li>
+            <li class="darkmode-toggle-li">
+                <button id="darkModeToggle" class="darkmode-toggle" title="Toggle dark mode">🌙</button>
+            </li>
+        </ul>
+    </nav>
+    <header class="hero-section">
+        <img src="GYM_Website_Images/heroImage.png" alt="Workout Vibes Hero" class="hero-img">
+        <div class="hero-content">
+            <h1>Workout Vibes</h1>
+            <p>Unleash your potential. Get fit, stay healthy, and join the vibe!</p>
+            <a href="#memberships" class="cta-btn">Join Now</a>
+        </div>
+    </header>
+    <section id="about" class="about-section">
+        <div class="about-img">
+            <img src="GYM_Website_Images/about.jpg" alt="About Workout Vibes">
+        </div>
+        <div class="about-content">
+            <h2>How to Be Fit</h2>
+            <p>At Workout Vibes, we believe fitness is a lifestyle. Our trainers and community will help you achieve
+                your goals, whether you're a beginner or a pro. Start your journey today!</p>
+        </div>
+    </section>
+
+    <section id="memberships" class="memberships-section">
+        <h2>Membership Plans</h2>
+        <div class="membership-cards">
+            <div class="card">
+                <h3>Monthly</h3>
+                <p>₹999/month</p>
+                <button class="buy-btn" data-plan="monthly">Buy Now</button>
+            </div>
+            <div class="card">
+                <h3>6 Months</h3>
+                <p>₹4999/6 months</p>
+                <button class="buy-btn" data-plan="6months">Buy Now</button>
+            </div>
+            <div class="card">
+                <h3>1 Year</h3>
+                <p>₹8999/year</p>
+                <button class="buy-btn" data-plan="1year">Buy Now</button>
+            </div>
+        </div>
+        <a href="membership-history.html" class="history-link">View Membership History</a>
+    </section>
+    
+    <section id="reviews" class="reviews-section">
+        <h2>What Our Members Say</h2>
+        <div class="reviews-container">
+            <div class="review-card">
+                <div class="reviewer-image">
+                    <img src="reviewer images/reviewer 1.jpg" alt="Reviewer 1">
+                </div>
+                <div class="review-content">
+                    <h3>Nishant</h3>
+                    <div class="stars">★★★★★</div>
+                    <p>"Workout Vibes transformed my fitness journey! The trainers are amazing and the community is so supportive. I've never felt stronger!"</p>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="reviewer-image">
+                    <img src="reviewer images/reviewer 2.jpg" alt="Reviewer 2">
+                </div>
+                <div class="review-content">
+                    <h3>Jhinga</h3>
+                    <div class="stars">★★★★★</div>
+                    <p>"The personalized diet charts and workout plans are incredible. I've lost 20 pounds and gained so much confidence. Highly recommend!"</p>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="reviewer-image">
+                    <img src="reviewer images/reviewer 3.jpg" alt="Reviewer 3">
+                </div>
+                <div class="review-content">
+                    <h3>Pandu</h3>
+                    <div class="stars">★★★★★</div>
+                    <p>"Best gym experience ever! The facilities are top-notch and the staff really cares about your progress. Love the shop for quality supplements!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <p>&copy; 2024 Workout Vibes. All rights reserved.</p>
+    </footer>
+
+
+    <div id="chatbot-container">
+        <button id="chatbot-toggle">💬</button>
+        <div id="chatbot-window" style="display:none; flex-direction:column;">
+            <div id="chatbot-header">Ask about any exercise!</div>
+            <div id="chatbot-messages"></div>
+            <form id="chatbot-form">
+                <input type="text" id="chatbot-input" placeholder="Type exercise name..." autocomplete="off" required />
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+    <script src="main.js"></script>
+
+
+
+</body>
+
+</html>
